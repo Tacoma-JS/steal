@@ -33,22 +33,6 @@ var test01 = function (argument) {
     // ES6 shortcut for QUnit.test, Qunit.skip etc
     const { test, skip, module, todo } = QUnit;
 
-    module( "System" );
-
-    test("is 1) an object that 2) has fifty two properties and methods.",
-      function( assert ) {
-        assert.equal(typeof(System),'object',"Expecting an object");
-        var pmNames = Object.keys(System);//array of property & method names
-        assert.equal(pmNames.length,52,"Expecting 52 properties and methods");
-    });
-
-    test("can also be called like steal.System",
-      function( assert ) {
-        assert.equal(typeof(steal.System),'object',"Expecting an object");
-        var pmNames = Object.keys(steal.System);//array property & method names
-        assert.equal(pmNames.length,52,"Expecting 52 properties and methods");
-    });
-
     /* * * * * * * * * * * * * * * * * * * * * * * * * */
     module( "steal" );
       steal.dev.log(`  steal function:`);
@@ -62,8 +46,27 @@ var test01 = function (argument) {
       function( assert ) {
         assert.equal(typeof(steal),'function',"It is a function.");
         var pmNames = Object.keys(steal);//array of property & method names
-        assert.equal(pmNames.length,16,"Has sixteen properties and methods");
+        assert.equal(pmNames.length,16,"It has sixteen properties and methods");
     });
+
+
+    /* * * * * * * * * * * * * * * * * * * * * * * * * */
+    module( "System" );
+
+    test("is 1) an object that 2) has fifty five properties and methods.",
+      function( assert ) {
+        assert.equal(typeof(System),'object',"Is an object");
+        var pmNames = Object.keys(System);//array of property & method names
+        assert.equal(pmNames.length,55,"Expecting 55 properties and methods");
+    });
+
+    test("can also be called like steal.System",
+      function( assert ) {
+        assert.equal(typeof(steal.System),'object',"It is an object");
+        var pmNames = Object.keys(steal.System);//array property & method names
+        assert.equal(pmNames.length,55,"It has 55 properties and methods");
+    });
+
 
 }; //end function Test01
 
