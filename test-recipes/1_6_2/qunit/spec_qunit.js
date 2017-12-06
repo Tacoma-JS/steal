@@ -44,9 +44,18 @@ var test01 = function (argument) {
 
     test("is 1) a function that 2) has sixteen properties and methods.",
       function( assert ) {
-        assert.equal(typeof(steal),'function',"It is a function.");
+        assert.equal(typeof(steal),'function',"Is a function.");
         var pmNames = Object.keys(steal);//array of property & method names
-        assert.equal(pmNames.length,16,"It has sixteen properties and methods");
+        assert.equal(pmNames.length,16,"Has sixteen properties and methods");
+    });
+
+    test("FYI `steal.loader` object methods and properties are exactly similar"+
+         " to `steal.System` object",
+      function( assert ) {
+        var arry1 = Object.keys(steal.loader);//array of property & method names
+        var arry2 = Object.keys(steal.System);//array of property & method names
+        var similar = ( JSON.stringify(arry1) === JSON.stringify(arry2) );
+        assert.equal(similar,true,"Are similar objects");
     });
 
 
@@ -66,6 +75,32 @@ var test01 = function (argument) {
         var pmNames = Object.keys(steal.System);//array property & method names
         assert.equal(pmNames.length,55,"It has 55 properties and methods");
     });
+
+
+    /* * * * * * * * * * * * * * * * * * * * * * * * * */
+    module( "steal.loader method" );
+
+    test("steal.loader.allowModuleExecution(name) expects a valid module name"+
+         " as input and outputs an object promise ",
+      function( assert ) {
+        var name = "try_any_valid_string";
+        var okToExecute = steal.loader.allowModuleExecution(name);
+        assert.equal( typeof(okToExecute),'object',"The output is an object {Promise}." );
+        console.log( "  okToExecute" );
+        console.dir( okToExecute );
+
+        console.log( "  okToExecute.then()" );
+        okToExecute.then(
+          function(value) { console.log("    resolved: " + value);},
+          function(value) { console.log("    rejected: " + value);}
+        );
+
+        assert.equal( okToExecute._handler.resolved,true,"It is okay to"+
+                    " execute the valid module named with: " + name );
+    });
+
+
+
 
 
 }; //end function Test01
