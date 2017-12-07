@@ -114,6 +114,22 @@ var test01 = function (argument) {
     });
 
 
+/**
+ * `Clone` can receive nothing as input and returns a copy of the `steal`
+ * object with the `System` object copied onto steal as the `loader`
+ * object such that System === steal.loader.
+*/
+    test("`clone` can receive nothing as input and returns a copy of the "+
+         "steal object with the `System` object copied onto steal as the "+
+         "`loader` object such that System === steal.loader.",
+      function( assert ) {
+        var testMe = JSON.stringify( steal.clone() );
+        var expectedValue = JSON.stringify( steal );
+        assert.equal(testMe,expectedValue,
+                    "Copies itself so that steal.clone() === steal");
+        assert.equal(steal.loader,System,"System === steal.loader");
+    });
+
 
     /* * * * * * * * * * * * * * * * * * * * * * * * * */
     module( "System" );
