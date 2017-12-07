@@ -4,11 +4,11 @@
  * QUnit test specifications to help gain understanding of the steal.js methods
  * and properties.  You can do something like `console.dir(steal)` to
  * display these in alphabetical order.  The tests are in the same order.
- * 
- * Passing test do NOT mean that `steal` is functioning as expected, it only
+ *
+ * Passing tests do NOT mean that `steal` is functioning as expected, it only
  * means that the tests were written retrospectively to pass the way it is
  * working, which may be different than the expectation.
- * 
+ *
  * QUnit Usage:
  *       See the [api](http://api.qunitjs.com/)
 */
@@ -73,7 +73,8 @@ var test01 = function (argument) {
 
     /**
      * FYI `steal.loader` object methods and properties are exactly similar
-     * to the `steal.System` object
+     * to the `steal.System` object, however System is kept for backwards
+     * compatibility.
     */
     test("FYI `steal.loader` object methods and properties are exactly similar"+
          " to the `steal.System` object",
@@ -82,6 +83,34 @@ var test01 = function (argument) {
         var arry2 = Object.keys(steal.System);//array of property & method names
         var similar = ( JSON.stringify(arry1) === JSON.stringify(arry2) );
         assert.equal(similar,true,"Are similar objects");
+    });
+
+
+   /**
+    *     The `addExtension` method expects a function as input, and pushes
+    *     that function onto the `System._extensions` array if it exists,
+    *     else calls input function with System as argument like `in(System)`
+    *     There is no return value.
+    */
+    test("`addExtension` method expects a function as input, and pushes "+
+         "that function onto the `System._extensions` array if it exists, "+
+         "else calls input function with System as argument like `in(System)`"+
+         ". There is no return value.",
+      function( assert ) {
+        var f1 = JSON.stringify(steal.addExtension);
+        var f2 = JSON.stringify(steal.addStealExtension);
+        var similar = ( f1 === f2 );// compare text of each function
+
+        assert.equal(similar,true,"Is the same as addStealExtension");
+
+        var btf = function BogusTestFunction(inp) {return inp;};
+        steal.addExtension( btf );
+
+        function didItLoad(inp) { return inp.name === "BogusTestFunction" }
+        var f3 = System._extensions.find( didItLoad );//find BogusTestFunction
+
+        assert.equal( f3("itworks"),"itworks",
+                      " BogusTestFunction extension loaded ok." );
     });
 
 
@@ -142,6 +171,14 @@ var test01 = function (argument) {
         );// end then
     }); // end test steal.loader.allowModuleExecution(name)
 
+
+
+/*
+    test("template test copy me :) ",
+      function( assert ) {
+        assert.equal(testMe,expectedValue,"Is a testMe");
+    });
+*/
 
 }; //end function Test01
 
