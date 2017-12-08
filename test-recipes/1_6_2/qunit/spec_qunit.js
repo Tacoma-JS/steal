@@ -1,4 +1,4 @@
-/*global QUnit steal*/
+/*global QUnit steal System*/
 
 /**
  * QUnit test specifications to help gain understanding of the steal.js methods
@@ -17,6 +17,7 @@ var moduleName = "spec_qunit.js";
 
 import $ from "jQuery"; // dependency for qunit
 //import myModuleUnderTest from "myModuleUnderTest"; // SUT
+import myImportedLoader from "@loader";
 
 //debug only
 function confirmjQueryLoaded() {
@@ -43,12 +44,6 @@ var test01 = function (argument) {
 
 
 
-    /* * * * * * * * * * * * * * * * * * * * * * * * * */
-    module( "steal" );
-    /* * * * * * * * * * * * * * * * * * * * * * * * * */
-
-      steal.dev.log(`  steal function:`);
-      console.dir(steal);
 
     /**
      * Steal version 1.6.2 under test === steal.version
@@ -58,8 +53,19 @@ var test01 = function (argument) {
     todo( "version 1.6.2 under test === steal.version . From"+
           " https://cdn.jsdelivr.net/npm/steal@1.6.2/steal.js",
       function( assert ) {
-        assert.equal( steal.version, "1.6.2","Expecting version 1.6.2" );
+        assert.equal( steal.version, "1.6.2",
+                      "Expecting `steal.version` to return 1.6.2" );
     });
+
+
+
+    /* * * * * * * * * * * * * * * * * * * * * * * * * */
+    module( "steal" );
+    /* * * * * * * * * * * * * * * * * * * * * * * * * */
+
+      steal.dev.log(`  steal function:`);
+      console.dir(steal);
+
 
     /**
      * `steal` is a function that has sixteen properties and methods.
@@ -67,23 +73,14 @@ var test01 = function (argument) {
     test("is 1) a function that 2) has sixteen properties and methods.",
       function( assert ) {
         assert.equal(typeof(steal),'function',"Is a function.");
-        var pmNames = Object.keys(steal);//array of property & method names
-        assert.equal(pmNames.length,16,"Has sixteen properties and methods");
+        var propertyMethodNames = Object.keys(steal);//array 
+        propertyMethodNames.sort();
+        var addToEnd = propertyMethodNames.shift();// for readability...
+        propertyMethodNames.push(addToEnd);// put `System` at end of list
+        assert.equal(propertyMethodNames.length,16,
+                     "Has sixteen properties and methods: " + propertyMethodNames );
     });
 
-    /**
-     * FYI `steal.loader` object methods and properties are exactly similar
-     * to the `steal.System` object, however System is kept for backwards
-     * compatibility.
-    */
-    test("FYI `steal.loader` object methods and properties are exactly similar"+
-         " to the `steal.System` object",
-      function( assert ) {
-        var arry1 = Object.keys(steal.loader);//array of property & method names
-        var arry2 = Object.keys(steal.System);//array of property & method names
-        var similar = ( JSON.stringify(arry1) === JSON.stringify(arry2) );
-        assert.equal(similar,true,"Are similar objects");
-    });
 
 
    /**
@@ -121,40 +118,58 @@ var test01 = function (argument) {
 */
     test("`clone` can receive nothing as input and returns a copy of the "+
          "steal object with the `System` object copied onto steal as the "+
-         "`loader` object such that System === steal.loader.",
+         "`loader` object such that steal.loader === System.",
       function( assert ) {
         var testMe = JSON.stringify( steal.clone() );
         var expectedValue = JSON.stringify( steal );
         assert.equal(testMe,expectedValue,
-                    "Copies itself so that steal.clone() === steal");
-        assert.equal(steal.loader,System,"System === steal.loader");
+                    "Copies itself so that steal.clone() returns steal");
+        assert.equal(steal.loader,System,"steal.loader === System");
     });
+
 
 
     /* * * * * * * * * * * * * * * * * * * * * * * * * */
-    module( "System" );
+    module( "steal.loader" );
     /* * * * * * * * * * * * * * * * * * * * * * * * * */
 
     /**
-     * `System`is an object that has fifty five properties and methods.
+     * FYI `steal.loader` object methods and properties are exactly similar
+     * to the `steal.System` object are exactly similar to System. The
+     * steal.System name is kept for backwards compatibility.
     */
-    test("is 1) an object that 2) has fifty five properties and methods.",
+    test("`steal.loader` object methods and properties are exactly similar"+
+         " to the `steal.System` and `System` object by definition.",
       function( assert ) {
-        assert.equal(typeof(System),'object',"Is an object");
-        var pmNames = Object.keys(System);//array of property & method names
-        assert.equal(pmNames.length,55,"Expecting 55 properties and methods");
-    });
+        assert.equal(typeof(steal.loader),'object',"steal.loader is an object");
+        assert.equal(typeof(steal.System),'object',"steal.System is an object");
+        var arry1 = Object.keys(steal.loader);//array of property & method names
+        var arry2 = Object.keys(steal.System);//array of property & method names
+        var arry3 = Object.keys(System);//array of property & method names
+        var similar = ( JSON.stringify(arry1) === JSON.stringify(arry2) );
+        assert.equal(similar,true,
+                     "`steal.loader` and `steal.System` are similar objects");
 
-    /**
-     * `System`can also be called like `steal.System`.
-    */
-    test("can also be called like steal.System",
-      function( assert ) {
-        assert.equal(typeof(steal.System),'object',"It is an object");
-        var pmNames = Object.keys(steal.System);//array property & method names
-        assert.equal(pmNames.length,55,"It has 55 properties and methods");
-    });
+        similar = ( JSON.stringify(arry1) === JSON.stringify(arry3) );
+        assert.equal(similar,true,
+                     "`steal.loader` and `System` are similar objects");
 
+        var pmNames = Object.keys(steal.loader);//array property & method names
+        var diff = Object.keys(steal.loader).length - Object.keys(steal.System).length;
+        assert.equal(pmNames.length,55,"steal.loader has 55 properties and methods");
+        assert.equal(diff,0,"steal.System has the same quanity");
+        assert.equal(1,1,"Use steal.loader, the name steal.System is being "+
+                     "kept for backwards compatibility");
+
+        /*
+           The API docs recommend this usage: 
+           ` import myImportedLoader from "@loader"; `
+        */
+        assert.equal( Object.keys(myImportedLoader).length,55,
+                    "`import myImportedLoader from '@loader' ` imports "+
+                    "steal.loader which has 55 properties and methods");
+
+    });
 
 
     /* * * * * * * * * * * * * * * * * * * * * * * * * */
