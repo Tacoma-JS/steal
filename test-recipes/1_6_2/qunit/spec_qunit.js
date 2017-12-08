@@ -210,7 +210,26 @@ var test01 = function (argument) {
         );// end then
     }); // end test steal.loader.allowModuleExecution(name)
 
+/**
+ * The method `steal.loader.amdDefine()` is assigned from the function
+ * `define(modName, modDeps, modFactory)` which expects inputs in the
+ * asynchronous module defintion format.
 
+*/
+    test("`steal.loader.amdDefine()`",
+      function( assert ) {
+        try{
+                steal.loader.amdDefine();
+        }catch(e){
+          var errorCaught = (e.stack.substring(0,9) === "TypeError");
+        }
+       /** If modName is not defined then throw a TypeError */
+       assert.equal(errorCaught,true,"argument must NOT be undefined; Catches a TypeError");
+
+       /** If `modDeps` is not an array then assign ` ['require', 'exports', 'module'] ` . */
+       /** If `modFactory` is not defined then assign an empty factory .  */
+
+    });
 
 /*
     test("template test copy me :) ",
