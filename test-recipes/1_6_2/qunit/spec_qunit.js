@@ -73,7 +73,7 @@ var test01 = function (argument) {
     test("is 1) a function that 2) has sixteen properties and methods.",
       function( assert ) {
         assert.equal(typeof(steal),'function',"Is a function.");
-        var propertyMethodNames = Object.keys(steal);//array 
+        var propertyMethodNames = Object.keys(steal);//array
         propertyMethodNames.sort();
         var addToEnd = propertyMethodNames.shift();// for readability...
         propertyMethodNames.push(addToEnd);// put `System` at end of list
@@ -154,22 +154,30 @@ var test01 = function (argument) {
         assert.equal(similar,true,
                      "`steal.loader` and `System` are similar objects");
 
-        var pmNames = Object.keys(steal.loader);//array property & method names
-        var diff = Object.keys(steal.loader).length - Object.keys(steal.System).length;
-        assert.equal(pmNames.length,55,"steal.loader has 55 properties and methods");
-        assert.equal(diff,0,"steal.System has the same quanity");
+
+
         assert.equal(1,1,"Use steal.loader, the name steal.System is being "+
                      "kept for backwards compatibility");
 
         /*
-           The API docs recommend this usage: 
+           The API docs recommend this usage:
            ` import myImportedLoader from "@loader"; `
         */
         assert.equal( Object.keys(myImportedLoader).length,55,
                     "`import myImportedLoader from '@loader' ` imports "+
                     "steal.loader which has 55 properties and methods");
 
-    });
+        var propertyMethodNames = Object.keys(steal.loader);//array
+        propertyMethodNames.sort();
+        var pmList = QUnit.dump.parse( propertyMethodNames );
+        assert.equal(propertyMethodNames.length,55,
+                     "steal.loader has 55 properties and methods:"+
+                     pmList);
+
+
+        var diff = Object.keys(steal.loader).length - Object.keys(steal.System).length;
+        assert.equal(diff,0,"steal.System has the same quanity");
+    });//end test
 
 
     /* * * * * * * * * * * * * * * * * * * * * * * * * */
