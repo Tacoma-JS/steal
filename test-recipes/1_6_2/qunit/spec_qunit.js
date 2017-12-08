@@ -1,14 +1,14 @@
-/*global QUnit steal*/
+/*global QUnit steal System*/
 
 /**
  * QUnit test specifications to help gain understanding of the steal.js methods
  * and properties.  You can do something like `console.dir(steal)` to
  * display these in alphabetical order.  The tests are in the same order.
- * 
- * Passing test do NOT mean that `steal` is functioning as expected, it only
+ *
+ * Passing tests do NOT mean that `steal` is functioning as expected, it only
  * means that the tests were written retrospectively to pass the way it is
  * working, which may be different than the expectation.
- * 
+ *
  * QUnit Usage:
  *       See the [api](http://api.qunitjs.com/)
 */
@@ -17,6 +17,7 @@ var moduleName = "spec_qunit.js";
 
 import $ from "jQuery"; // dependency for qunit
 //import myModuleUnderTest from "myModuleUnderTest"; // SUT
+import myImportedLoader from "@loader";
 
 //debug only
 function confirmjQueryLoaded() {
@@ -43,12 +44,6 @@ var test01 = function (argument) {
 
 
 
-    /* * * * * * * * * * * * * * * * * * * * * * * * * */
-    module( "steal" );
-    /* * * * * * * * * * * * * * * * * * * * * * * * * */
-
-      steal.dev.log(`  steal function:`);
-      console.dir(steal);
 
     /**
      * Steal version 1.6.2 under test === steal.version
@@ -58,8 +53,19 @@ var test01 = function (argument) {
     todo( "version 1.6.2 under test === steal.version . From"+
           " https://cdn.jsdelivr.net/npm/steal@1.6.2/steal.js",
       function( assert ) {
-        assert.equal( steal.version, "1.6.2","Expecting version 1.6.2" );
+        assert.equal( steal.version, "1.6.2",
+                      "Expecting `steal.version` to return 1.6.2" );
     });
+
+
+
+    /* * * * * * * * * * * * * * * * * * * * * * * * * */
+    module( "steal" );
+    /* * * * * * * * * * * * * * * * * * * * * * * * * */
+
+      steal.dev.log(`  steal function:`);
+      console.dir(steal);
+
 
     /**
      * `steal` is a function that has sixteen properties and methods.
@@ -67,49 +73,111 @@ var test01 = function (argument) {
     test("is 1) a function that 2) has sixteen properties and methods.",
       function( assert ) {
         assert.equal(typeof(steal),'function',"Is a function.");
-        var pmNames = Object.keys(steal);//array of property & method names
-        assert.equal(pmNames.length,16,"Has sixteen properties and methods");
+        var propertyMethodNames = Object.keys(steal);//array
+        propertyMethodNames.sort();
+        var addToEnd = propertyMethodNames.shift();// for readability...
+        propertyMethodNames.push(addToEnd);// put `System` at end of list
+        assert.equal(propertyMethodNames.length,16,
+                     "Has sixteen properties and methods: " + propertyMethodNames );
     });
+
+
+
+   /**
+    *     The `addExtension` method expects a function as input, and pushes
+    *     that function onto the `System._extensions` array if it exists,
+    *     else calls input function with System as argument like `in(System)`
+    *     There is no return value.
+    */
+    test("`addExtension` method expects a function as input, and pushes "+
+         "that function onto the `System._extensions` array if it exists, "+
+         "else calls input function with System as argument like `in(System)`"+
+         ". There is no return value.",
+      function( assert ) {
+        var f1 = JSON.stringify(steal.addExtension);
+        var f2 = JSON.stringify(steal.addStealExtension);
+        var similar = ( f1 === f2 );// compare text of each function
+
+        assert.equal(similar,true,"Is the same as addStealExtension");
+
+        var btf = function BogusTestFunction(inp) {return inp;};
+        steal.addExtension( btf );
+
+        function didItLoad(inp) { return inp.name === "BogusTestFunction" }
+        var f3 = System._extensions.find( didItLoad );//find BogusTestFunction
+
+        assert.equal( f3("itworks"),"itworks",
+                      " BogusTestFunction extension loaded ok." );
+    });
+
+
+/**
+ * `Clone` can receive nothing as input and returns a copy of the `steal`
+ * object with the `System` object copied onto steal as the `loader`
+ * object such that System === steal.loader.
+*/
+    test("`clone` can receive nothing as input and returns a copy of the "+
+         "steal object with the `System` object copied onto steal as the "+
+         "`loader` object such that steal.loader === System.",
+      function( assert ) {
+        var testMe = JSON.stringify( steal.clone() );
+        var expectedValue = JSON.stringify( steal );
+        assert.equal(testMe,expectedValue,
+                    "Copies itself so that steal.clone() returns steal");
+        assert.equal(steal.loader,System,"steal.loader === System");
+    });
+
+
+
+    /* * * * * * * * * * * * * * * * * * * * * * * * * */
+    module( "steal.loader" );
+    /* * * * * * * * * * * * * * * * * * * * * * * * * */
 
     /**
      * FYI `steal.loader` object methods and properties are exactly similar
-     * to the `steal.System` object
+     * to the `steal.System` object are exactly similar to System. The
+     * steal.System name is kept for backwards compatibility.
     */
-    test("FYI `steal.loader` object methods and properties are exactly similar"+
-         " to the `steal.System` object",
+    test("`steal.loader` object methods and properties are exactly similar"+
+         " to the `steal.System` and `System` object by definition.",
       function( assert ) {
+        assert.equal(typeof(steal.loader),'object',"steal.loader is an object");
+        assert.equal(typeof(steal.System),'object',"steal.System is an object");
         var arry1 = Object.keys(steal.loader);//array of property & method names
         var arry2 = Object.keys(steal.System);//array of property & method names
+        var arry3 = Object.keys(System);//array of property & method names
         var similar = ( JSON.stringify(arry1) === JSON.stringify(arry2) );
-        assert.equal(similar,true,"Are similar objects");
-    });
+        assert.equal(similar,true,
+                     "`steal.loader` and `steal.System` are similar objects");
+
+        similar = ( JSON.stringify(arry1) === JSON.stringify(arry3) );
+        assert.equal(similar,true,
+                     "`steal.loader` and `System` are similar objects");
 
 
 
-    /* * * * * * * * * * * * * * * * * * * * * * * * * */
-    module( "System" );
-    /* * * * * * * * * * * * * * * * * * * * * * * * * */
+        assert.equal(1,1,"Use steal.loader, the name steal.System is being "+
+                     "kept for backwards compatibility");
 
-    /**
-     * `System`is an object that has fifty five properties and methods.
-    */
-    test("is 1) an object that 2) has fifty five properties and methods.",
-      function( assert ) {
-        assert.equal(typeof(System),'object',"Is an object");
-        var pmNames = Object.keys(System);//array of property & method names
-        assert.equal(pmNames.length,55,"Expecting 55 properties and methods");
-    });
+        /*
+           The API docs recommend this usage:
+           ` import myImportedLoader from "@loader"; `
+        */
+        assert.equal( Object.keys(myImportedLoader).length,55,
+                    "`import myImportedLoader from '@loader' ` imports "+
+                    "steal.loader which has 55 properties and methods");
 
-    /**
-     * `System`can also be called like `steal.System`.
-    */
-    test("can also be called like steal.System",
-      function( assert ) {
-        assert.equal(typeof(steal.System),'object',"It is an object");
-        var pmNames = Object.keys(steal.System);//array property & method names
-        assert.equal(pmNames.length,55,"It has 55 properties and methods");
-    });
+        var propertyMethodNames = Object.keys(steal.loader);//array
+        propertyMethodNames.sort();
+        var pmList = QUnit.dump.parse( propertyMethodNames );
+        assert.equal(propertyMethodNames.length,55,
+                     "steal.loader has 55 properties and methods:"+
+                     pmList);
 
+
+        var diff = Object.keys(steal.loader).length - Object.keys(steal.System).length;
+        assert.equal(diff,0,"steal.System has the same quanity");
+    });//end test
 
 
     /* * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -142,6 +210,33 @@ var test01 = function (argument) {
         );// end then
     }); // end test steal.loader.allowModuleExecution(name)
 
+/**
+ * The method `steal.loader.amdDefine()` is assigned from the function
+ * `define(modName, modDeps, modFactory)` which expects inputs in the
+ * asynchronous module defintion format.
+
+*/
+    test("`steal.loader.amdDefine()`",
+      function( assert ) {
+        try{
+                steal.loader.amdDefine();
+        }catch(e){
+          var errorCaught = (e.stack.substring(0,9) === "TypeError");
+        }
+       /** If modName is not defined then throw a TypeError */
+       assert.equal(errorCaught,true,"argument must NOT be undefined; Catches a TypeError");
+
+       /** If `modDeps` is not an array then assign ` ['require', 'exports', 'module'] ` . */
+       /** If `modFactory` is not defined then assign an empty factory .  */
+
+    });
+
+/*
+    test("template test copy me :) ",
+      function( assert ) {
+        assert.equal(testMe,expectedValue,"Is a testMe");
+    });
+*/
 
 }; //end function Test01
 
